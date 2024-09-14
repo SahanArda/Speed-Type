@@ -70,12 +70,16 @@ def get_scores():
     results = [{"username": score.user.username, "score": score.score} for score in scores]
     return jsonify({"scores": results})
 
-# New route to get all users with their username and email
+# Route to get all users with their username and email
 @app.route("/users", methods=["GET"])
 def get_users():
-    users = User.query.all()
-    users_list = [{"username": user.username, "email": user.email} for user in users]
-    return jsonify({"users": users_list})
+    users = User.query.all()  # Fetch all users from the database
+    results = [
+        {"id": user.id, "username": user.username, "email": user.email}
+        for user in users
+    ]
+    return jsonify({"users": results}), 200
+
 
 @app.route("/update_user", methods=["PUT"])
 @jwt_required()
@@ -83,31 +87,54 @@ def update_user():
     user_id = get_jwt_identity()  # Get user ID from JWT
     data = request.get_json()
 
+    print(f"Update request data: {data}")  # Debugging line
+
     # Find the user by their ID
     user = User.query.get(user_id)
     
     if not user:
         return jsonify({"message": "User not found"}), 404
 
-    # Optional: Validate input before updating
-    if data.get("username"):
+    # If "username" is provided in the request, validate and update it
+    if "username" in data:
+        print(f"Updating username to: {data['username']}")  # Debugging line
+        if not data["username"].strip():
+            return jsonify({"message": "Username cannot be empty"}), 400
         user.username = data["username"]
-    if data.get("email"):
-        if User.query.filter_by(email=data["email"]).first():
+
+    # If "email" is provided in the request, validate and update it
+    if "email" in data:
+        print(f"Updating email to: {data['email']}")  # Debugging line
+        if not data["email"].strip():
+            return jsonify({"message": "Email cannot be empty"}), 400
+        if not is_valid_email(data["email"]):
+            return jsonify({"message": "Invalid email format"}), 400
+        # Ensure email is unique for other users (excluding the current user)
+        existing_user = User.query.filter_by(email=data["email"]).first()
+        if existing_user and existing_user.id != user_id:
             return jsonify({"message": "Email already exists"}), 400
         user.email = data["email"]
 
-    db.session.commit()
-    return jsonify({"message": "User updated successfully"}), 200
+    # If "password" is provided in the request, validate and update it
+    if "password" in data:
+        print(f"Updating password")
+        if len(data["password"]) < 6:
+            return jsonify({"message": "Password must be at least 6 characters long"}), 400
+        user.set_password(data["password"])
 
-@app.route("/delete_user", methods=["DELETE"])
-@jwt_required()
-def delete_user():
-    user_id = get_jwt_identity()  # Get user ID from JWT
-    
+    # Commit the changes to the database
+    try:
+        db.session.commit()
+        return jsonify({"message": "User updated successfully"}), 200
+    except Exception as e:
+        print(f"Error during commit: {str(e)}")
+        return jsonify({"message": "An error occurred while updating the user"}), 500
+
+@app.route("/delete_user/<int:user_id>", methods=["DELETE"])
+def delete_user(user_id):
     # Find the user by their ID
     user = User.query.get(user_id)
-
+    
     if not user:
         return jsonify({"message": "User not found"}), 404
 
