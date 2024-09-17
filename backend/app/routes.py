@@ -4,6 +4,9 @@ from flask import request, jsonify
 from app import app, db, bcrypt
 from app.models import User, Score
 from flask_jwt_extended import create_access_token, jwt_required, jwt_required, get_jwt_identity
+from flask_cors import CORS
+
+CORS(app)
 
 fake = Faker()
 
