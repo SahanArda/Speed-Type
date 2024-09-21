@@ -35,9 +35,9 @@ const LoginForm = () => {
   
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-purple">
+    <div className="flex items-center justify-center min-h-screen bg-midnight">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-center text-gray-900">Login</h2>
+        <h2 className="text-2xl font-bold text-center text-text-color">Login</h2>
 
         {error && <div className="text-red-500 text-center">{error}</div>}
 
@@ -79,7 +79,7 @@ const LoginForm = () => {
               <div>
                 <button
                   type="submit"
-                  className="w-full px-4 py-2 font-bold text-white bg-purple-600 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-4 py-2 font-bold text-black bg-purple-600 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Logging in..." : "Login"}

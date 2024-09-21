@@ -61,10 +61,13 @@ def login():
 @jwt_required()
 def generate_paragraph():
     # Generate a realistic paragraph using Faker
-    paragraph_text = fake.text(max_nb_chars=500)
+    paragraph_text = fake.paragraph(nb_sentences=5)  # More structured paragraph
     # Remove newline characters
     paragraph_text = paragraph_text.replace('\n', ' ')
-    return jsonify({"paragraph": paragraph_text})
+    
+    return jsonify({
+        "paragraph": paragraph_text,
+    })
 
 @app.route("/scores", methods=["GET"])
 @jwt_required()
