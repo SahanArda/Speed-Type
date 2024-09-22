@@ -141,7 +141,7 @@ const Home = () => {
         {paragraph.split("").map((char, index) => {
           const typedChar = typedText[index];
 
-          // Default color if not typed yet
+          // Default colour if not typed yet
           let color = "text-slate";
 
           // Correctly typed character
@@ -154,7 +154,7 @@ const Home = () => {
             color = "text-red-500";
           }
 
-          // Add a cursor that blinks only after typing stops
+          // Cursor that blinks only after typing stops
           const isCursor = index === typedText.length;
 
           return (
@@ -200,7 +200,7 @@ const Home = () => {
             type="text"
             value={typedText}
             className="opacity-0 absolute"
-            onChange={() => {}} // No need to update value as we handle with handleKeyPress
+            onChange={() => {}} // No need to update value as handles with handleKeyPress
           />
 
           {/* Typing stats */}
