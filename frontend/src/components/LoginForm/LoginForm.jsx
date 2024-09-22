@@ -32,12 +32,11 @@ const LoginForm = () => {
       setError("Invalid email or password");
     }
   };
-  
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-primary">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-center text-black">Login</h2>
+    <div className="flex items-center justify-center min-h-screen bg-navy">
+      <div className="w-full max-w-md p-8 space-y-6 bg-light-navy rounded-lg shadow-lg">
+        <h2 className="text-2xl font-bold text-center text-lightest-slate">Login</h2>
 
         {error && <div className="text-red-500 text-center">{error}</div>}
 
@@ -49,11 +48,11 @@ const LoginForm = () => {
           {({ isSubmitting }) => (
             <Form className="space-y-4">
               <div>
-                <label className="block text-black">Email</label>
+                <label className="block text-lightest-slate">Email</label>
                 <Field
                   type="email"
                   name="email"
-                  className="w-full p-2 mt-1 border rounded-md border-gray-700 focus:ring-slate-500 focus:border-slate-500 dark:bg-slate-700"
+                  className="w-full p-2 mt-1 border rounded-md border-slate focus:ring-green focus:border-green bg-light-navy text-light-slate"
                 />
                 <ErrorMessage
                   name="email"
@@ -63,11 +62,11 @@ const LoginForm = () => {
               </div>
 
               <div>
-                <label className="block text-black">Password</label>
+                <label className="block text-lightest-slate">Password</label>
                 <Field
                   type="password"
                   name="password"
-                  className="w-full p-2 mt-1 border rounded-md border-gray-700 focus:ring-slate-500 focus:border-slate-500 dark:bg-slate-700"
+                  className="w-full p-2 mt-1 border rounded-md border-slate focus:ring-green focus:border-green bg-light-navy text-light-slate"
                 />
                 <ErrorMessage
                   name="password"
@@ -79,7 +78,7 @@ const LoginForm = () => {
               <div>
                 <button
                   type="submit"
-                  className="w-full px-4 py-2 mt-3 font-bold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 mt-3 font-bold text-navy bg-green rounded-md hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-green"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Logging in..." : "Login"}
@@ -90,7 +89,7 @@ const LoginForm = () => {
         </Formik>
 
         <div className="text-center">
-          <Link to="/register" className="dark:text-slate-400 hover:underline">
+          <Link to="/register" className="text-green hover:underline">
             Don&apos;t have an account? Register here.
           </Link>
         </div>

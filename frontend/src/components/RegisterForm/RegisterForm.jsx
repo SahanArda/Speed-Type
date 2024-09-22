@@ -44,9 +44,9 @@ const RegisterForm = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-primary">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-center text-gray-900">
+    <div className="flex items-center justify-center min-h-screen bg-navy">
+      <div className="w-full max-w-md p-8 space-y-6 bg-light-navy rounded-lg shadow-lg">
+        <h2 className="text-2xl font-bold text-center text-lightest-slate">
           Register
         </h2>
 
@@ -65,11 +65,11 @@ const RegisterForm = () => {
           {({ isSubmitting }) => (
             <Form className="space-y-4">
               <div>
-                <label className="block text-gray-700">Username</label>
+                <label className="block text-lightest-slate">Username</label>
                 <Field
                   type="text"
                   name="username"
-                  className="w-full p-2 mt-1 border rounded-md border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+                  className="w-full p-2 mt-1 border rounded-md border-slate focus:ring-green focus:border-green bg-light-navy text-light-slate"
                 />
                 <ErrorMessage
                   name="username"
@@ -79,11 +79,11 @@ const RegisterForm = () => {
               </div>
 
               <div>
-                <label className="block text-gray-700">Email</label>
+                <label className="block text-lightest-slate">Email</label>
                 <Field
                   type="email"
                   name="email"
-                  className="w-full p-2 mt-1 border rounded-md border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+                  className="w-full p-2 mt-1 border rounded-md border-slate focus:ring-green focus:border-green bg-light-navy text-light-slate"
                 />
                 <ErrorMessage
                   name="email"
@@ -93,11 +93,11 @@ const RegisterForm = () => {
               </div>
 
               <div>
-                <label className="block text-gray-700">Password</label>
+                <label className="block text-lightest-slate">Password</label>
                 <Field
                   type="password"
                   name="password"
-                  className="w-full p-2 mt-1 border rounded-md border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+                  className="w-full p-2 mt-1 border rounded-md border-slate focus:ring-green focus:border-green bg-light-navy text-light-slate"
                 />
                 <ErrorMessage
                   name="password"
@@ -107,11 +107,11 @@ const RegisterForm = () => {
               </div>
 
               <div>
-                <label className="block text-gray-700">Confirm Password</label>
+                <label className="block text-lightest-slate">Confirm Password</label>
                 <Field
                   type="password"
                   name="passwordConfirmation"
-                  className="w-full p-2 mt-1 border rounded-md border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+                  className="w-full p-2 mt-1 border rounded-md border-slate focus:ring-green focus:border-green bg-light-navy text-light-slate"
                 />
                 <ErrorMessage
                   name="passwordConfirmation"
@@ -123,7 +123,7 @@ const RegisterForm = () => {
               <div>
                 <button
                   type="submit"
-                  className="w-full px-4 py-2 font-bold text-white bg-purple-600 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-4 py-2 font-bold text-navy bg-green rounded-md hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-green"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Creating Account..." : "Register"}
@@ -134,7 +134,7 @@ const RegisterForm = () => {
         </Formik>
 
         <div className="text-center">
-          <Link to="/" className="text-purple-600 hover:underline">
+          <Link to="/" className="text-green hover:underline">
             Already have an account? Login here.
           </Link>
         </div>
