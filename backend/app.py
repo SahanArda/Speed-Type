@@ -7,6 +7,7 @@ from flask_jwt_extended import JWTManager
 
 # Initialize Flask app and extensions
 app = Flask(__name__)
+
 app.config.from_object(Config)
 
 db = SQLAlchemy(app)

@@ -2,8 +2,11 @@ import re  # For email validation
 from faker import Faker
 from flask import request, jsonify
 from app import app, db, bcrypt
-from app.models import User, Score
-from flask_jwt_extended import create_access_token, jwt_required, jwt_required, get_jwt_identity
+from app.models import User
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_cors import CORS
+
+CORS(app)
 
 fake = Faker()
 
@@ -57,18 +60,15 @@ def login():
 @app.route("/generated_paragraph", methods=["GET"])
 @jwt_required()
 def generate_paragraph():
-    # Generate a realistic paragraph using Faker
-    paragraph_text = fake.text(max_nb_chars=500)
-    # Remove newline characters
+    # Generate a longer text using Faker
+    paragraph_text = fake.text(max_nb_chars=500)  # Generate a paragraph with a maximum of 500 characters
+    # Remove newline characters and ensure it's continuous text
     paragraph_text = paragraph_text.replace('\n', ' ')
-    return jsonify({"paragraph": paragraph_text})
+    
+    return jsonify({
+        "paragraph": paragraph_text,
+    })
 
-@app.route("/scores", methods=["GET"])
-@jwt_required()
-def get_scores():
-    scores = Score.query.order_by(Score.score.desc()).limit(10).all()
-    results = [{"username": score.user.username, "score": score.score} for score in scores]
-    return jsonify({"scores": results})
 
 # Route to get all users with their username and email
 @app.route("/users", methods=["GET"])
@@ -79,7 +79,6 @@ def get_users():
         for user in users
     ]
     return jsonify({"users": results}), 200
-
 
 @app.route("/update_user", methods=["PUT"])
 @jwt_required()
