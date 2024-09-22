@@ -3,7 +3,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import { Link, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import axios from "axios";
-import auth from "../../Services/Auth";
+import auth from "../../services/auth";
 
 const RegisterForm = () => {
   const navigate = useNavigate();
@@ -44,7 +44,7 @@ const RegisterForm = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-purple">
+    <div className="flex items-center justify-center min-h-screen bg-primary">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold text-center text-gray-900">
           Register

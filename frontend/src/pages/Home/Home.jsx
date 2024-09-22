@@ -1,182 +1,242 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import auth from "../../Services/Auth";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import auth from "../../services/auth";
+import Logout from "../../components/Logout/Logout";
 
 const Home = () => {
-  const navigate = useNavigate();
   const [paragraph, setParagraph] = useState("");
   const [typedText, setTypedText] = useState("");
-  const [timer, setTimer] = useState(30); // Default time limit is 30 seconds
-  const [isTyping, setIsTyping] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(30); // Timer starts at 30 seconds
   const [wpm, setWpm] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
-  const [isTestOver, setIsTestOver] = useState(false);
-  const [correctChars, setCorrectChars] = useState(0); // Track correct characters
+  const [started, setStarted] = useState(false);
+  const [errors, setErrors] = useState(0);
+  const [showResults, setShowResults] = useState(false);
+  const [isTestOver, setIsTestOver] = useState(false); // New state to prevent typing after test
+  const [isTyping, setIsTyping] = useState(false); // Track typing activity
+  const inputRef = useRef(null);
+  const cursorRef = useRef(null);
+  let typingTimeout = useRef(null); // Timeout for blinking behavior
 
-  const currentCharIndex = useRef(0); // Tracks the current index in the paragraph
-  const typingAreaRef = useRef(null);
-
+  // Fetch paragraph on component mount
   useEffect(() => {
-    // Fetch the paragraph from the backend
     const fetchParagraph = async () => {
+      const token = auth.getToken();
+      const config = {
+        headers: { Authorization: `Bearer ${token}` },
+      };
       try {
         const response = await axios.get(
           "http://127.0.0.1:5000/generated_paragraph",
-          {
-            headers: {
-              Authorization: `Bearer ${auth.getToken()}`,
-            },
-          }
+          config
         );
         setParagraph(response.data.paragraph);
       } catch (error) {
-        console.error("Error fetching paragraph", error);
+        console.error("Error fetching paragraph:", error);
       }
     };
 
     fetchParagraph();
   }, []);
 
+  // Timer logic
   useEffect(() => {
-    let interval;
-    if (isTyping && timer > 0) {
-      interval = setInterval(() => {
-        setTimer((prev) => prev - 1);
-      }, 1000);
-    } else if (timer === 0) {
-      setIsTestOver(true);
-      setIsTyping(false);
+    let timer = null;
+    if (started && timeLeft > 0) {
+      timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+    } else if (timeLeft === 0) {
+      calculateResults();
+      setIsTestOver(true); // Mark the test as over
     }
 
-    return () => clearInterval(interval);
-  }, [isTyping, timer]);
+    return () => clearTimeout(timer);
+  }, [started, timeLeft]);
 
+  const handleKeyPress = (e) => {
+    if (!started) {
+      setStarted(true);
+    }
+
+    // Do not allow typing after the test is over
+    if (isTestOver) return;
+
+    // Handle typing activity
+    setIsTyping(true);
+    clearTimeout(typingTimeout.current); // Clear the timeout if the user is typing
+
+    typingTimeout.current = setTimeout(() => {
+      setIsTyping(false); // Set the cursor to blink if the user stops typing
+    }, 1000); // 1 second delay before blinking resumes
+
+    let newTypedText = typedText;
+
+    if (e.key === "Backspace") {
+      newTypedText = newTypedText.slice(0, -1); // Remove last character
+    } else if (e.key.length === 1 || e.key === " ") {
+      newTypedText += e.key; // Add the typed character or space
+    }
+
+    setTypedText(newTypedText);
+    updateStats(newTypedText);
+  };
+
+  // Focus the hidden input on component mount to capture typing automatically
   useEffect(() => {
-    // Focus the typing area when the component mounts
-    typingAreaRef.current.focus();
+    inputRef.current.focus();
   }, []);
 
-  const handleKeyDown = (e) => {
-    if (isTestOver || timer === 0) return;
+  const updateStats = (typed) => {
+    let errorCount = 0;
 
-    if (!isTyping) setIsTyping(true);
-
-    const key = e.key;
-    const currentChar = paragraph[currentCharIndex.current];
-
-    if (key === "Backspace") {
-      // Handle backspace
-      if (typedText.length > 0) {
-        setTypedText((prev) => prev.slice(0, -1));
-        currentCharIndex.current = Math.max(currentCharIndex.current - 1, 0);
-
-        // Update correctChars
-        if (typedText.slice(-1) === paragraph[currentCharIndex.current]) {
-          setCorrectChars((prev) => prev - 1);
-        }
-
-        // Recalculate accuracy
-        const updatedCorrectChars = correctChars - (typedText.slice(-1) === paragraph[currentCharIndex.current] ? 1 : 0);
-        const updatedTypedLength = typedText.length - 1;
-        const accuracyPercentage = ((updatedCorrectChars / updatedTypedLength) * 100).toFixed(2);
-        setAccuracy(isNaN(accuracyPercentage) ? 100 : accuracyPercentage);
+    // Count errors
+    for (let i = 0; i < typed.length; i++) {
+      if (typed[i] !== paragraph[i]) {
+        errorCount++;
       }
-    } else if (key.length === 1) {
-      // Only handle printable characters
-      setTypedText((prev) => prev + key);
-
-      if (key === currentChar) {
-        setCorrectChars((prev) => prev + 1);
-      }
-
-      currentCharIndex.current += 1; // Move to the next character
-
-      // If the user finishes typing the paragraph, stop the test
-      if (currentCharIndex.current >= paragraph.length) {
-        setIsTestOver(true);
-        setIsTyping(false);
-      }
-
-      // Calculate Accuracy
-      const accuracyPercentage = (
-        (correctChars / typedText.length) *
-        100
-      ).toFixed(2);
-      setAccuracy(isNaN(accuracyPercentage) ? 100 : accuracyPercentage);
-
-      // Calculate Words Per Minute
-      const wordsTyped = typedText.trim().split(" ").filter((word) => word !== "").length;
-      const timeSpent = (30 - timer) / 60; // in minutes
-      setWpm(((wordsTyped / timeSpent)).toFixed(2));
     }
+
+    setErrors(errorCount);
+
+    // Calculate WPM (words per minute) based on the number of correct words typed
+    const correctTypedWords = typed
+      .split(" ")
+      .filter((word, index) => word === paragraph.split(" ")[index]).length;
+    setWpm(((correctTypedWords / (30 - timeLeft)) * 60).toFixed(2));
+
+    // Calculate accuracy as a percentage of correct characters
+    setAccuracy(
+      (((typed.length - errorCount) / typed.length) * 100).toFixed(2)
+    );
   };
 
-  const handleLogout = () => {
-    auth.logout();
-    navigate("/");
+  const calculateResults = () => {
+    // Show the results modal
+    setShowResults(true);
   };
 
-  const renderHighlightedText = () => {
-    return paragraph.split("").map((char, idx) => {
-      let colorClass = "";
+  const handleCloseResults = () => {
+    // Reset all scores and text when the test restarts
+    setShowResults(false);
+    setTypedText("");
+    setTimeLeft(30);
+    setWpm(0);
+    setAccuracy(0);
+    setErrors(0);
+    setStarted(false); // Restart the test
+    setIsTestOver(false); // Allow typing again
+  };
 
-      if (idx < typedText.length) {
-        colorClass = typedText[idx] === char ? "text-green-600" : "text-red-600";
-      } else if (idx === typedText.length) {
-        colorClass = "text-blue-600 underline"; // Current character to type
-      }
+  // Render the paragraph with correct/incorrect highlights and cursor
+  const renderParagraph = () => {
+    return (
+      <span className="relative">
+        {/* Blinking cursor before the first character */}
+        {typedText.length === 0 && (
+          <span
+            ref={cursorRef}
+            className={`absolute border-r-2 border-green ${isTyping ? "" : "animate-blink"}`}
+            style={{ left: "-0.2rem", top: "0", height: "1.5em" }}
+          ></span>
+        )}
+        {paragraph.split("").map((char, index) => {
+          const typedChar = typedText[index];
 
-      return (
-        <span key={idx} className={colorClass}>
-          {char}
-        </span>
-      );
-    });
+          // Default color if not typed yet
+          let color = "text-slate";
+
+          // Correctly typed character
+          if (typedChar === char) {
+            color = "text-green";
+          }
+
+          // Incorrectly typed character
+          if (typedChar !== undefined && typedChar !== char) {
+            color = "text-red-500";
+          }
+
+          // Add a cursor that blinks only after typing stops
+          const isCursor = index === typedText.length;
+
+          return (
+            <span key={index} className={color} style={{ position: "relative" }}>
+              {char}
+              {isCursor && (
+                <span
+                  ref={cursorRef}
+                  className={`absolute border-r-2 border-green ${isTyping ? "" : "animate-blink"}`}
+                  style={{ left: "-1px", top: "0", height: "1.5em" }}
+                ></span>
+              )}
+            </span>
+          );
+        })}
+      </span>
+    );
   };
 
   return (
     <div
-      className="min-h-screen bg-purple-50"
-      ref={typingAreaRef}
+      className="min-h-screen bg-navy text-lightest-slate p-8"
       tabIndex="0"
-      onKeyDown={handleKeyDown}
+      onKeyDown={handleKeyPress}
     >
-      <nav className="flex justify-between items-center bg-purple-700 p-4 text-white">
-        <h1 className="text-xl font-bold">Speed Type</h1>
+      <nav className="flex justify-between items-center py-4">
+        <h1 className="text-3xl font-bold text-green">Speed Type</h1>
         <div>
-          <button onClick={() => navigate("/scoreboard")} className="mr-4">
-            Scoreboard
-          </button>
-          <button onClick={handleLogout}>Logout</button>
+          <Logout />
         </div>
       </nav>
 
-      <main className="flex flex-col items-center justify-center mt-12">
-        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-2xl">
-          <h2 className="text-2xl font-bold mb-4 text-center">Typing Test</h2>
+      <div className="flex flex-col items-center justify-center min-h-[80vh]">
+        <div className="p-8 w-full max-w-5xl">
+          {/* Render the paragraph with correct/incorrect highlights */}
+          <p className="text-4xl leading-relaxed text-light-slate mb-4">
+            {renderParagraph()}
+          </p>
 
-          {isTestOver ? (
-            <div className="text-center">
-              <h3 className="text-lg font-bold">Test Over</h3>
-              <p>WPM: {wpm}</p>
-              <p>Accuracy: {accuracy}%</p>
-            </div>
-          ) : (
-            <>
-              <div className="text-gray-700 mb-6 text-lg leading-relaxed">
-                {renderHighlightedText()}
-              </div>
+          {/* Hidden input to capture typing */}
+          <input
+            ref={inputRef}
+            type="text"
+            value={typedText}
+            className="opacity-0 absolute"
+            onChange={() => {}} // No need to update value as we handle with handleKeyPress
+          />
 
-              <div className="flex justify-between mt-4 text-xl">
-                <p>Time Left: {timer}s</p>
-                <p>WPM: {wpm}</p>
-                <p>Accuracy: {accuracy}%</p>
-              </div>
-            </>
-          )}
+          {/* Typing stats */}
+          <div className="mt-4 text-center flex justify-center items-center space-x-5">
+            <p className="text-lg text-lightest-slate">
+              Time Left: {timeLeft}s
+            </p>
+            <p className="text-lg text-lightest-slate">WPM: {wpm}</p>
+            <p className="text-lg text-lightest-slate">Accuracy: {accuracy}%</p>
+            <p className="text-lg text-red-500">Errors: {errors}</p>
+          </div>
         </div>
-      </main>
+      </div>
+
+      {/* Results Modal */}
+      {showResults && (
+        <div className="fixed inset-0 flex items-center justify-center bg-lightest-navy bg-opacity-75">
+          <div className="bg-light-navy p-8 rounded-lg shadow-lg">
+            <h3 className="text-2xl font-semibold text-center text-white">
+              Test Completed
+            </h3>
+            <p className="text-lg text-center mt-4 text-green">WPM: {wpm}</p>
+            <p className="text-lg text-center text-lightest-slate">
+              Accuracy: {accuracy}%
+            </p>
+            <p className="text-lg text-center text-red-500">Errors: {errors}</p>
+
+            <button
+              onClick={handleCloseResults}
+              className="mt-6 w-full px-4 py-2 font-bold text-white bg-lightest-navy rounded-md hover:bg-opacity-90"
+            >
+              Start New Test
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

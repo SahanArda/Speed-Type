@@ -3,7 +3,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import { Link, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import axios from "axios";
-import auth from "../../Services/Auth";
+import auth from "../../services/auth";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -35,9 +35,9 @@ const LoginForm = () => {
   
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-midnight">
+    <div className="flex items-center justify-center min-h-screen bg-primary">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-center text-text-color">Login</h2>
+        <h2 className="text-2xl font-bold text-center text-black">Login</h2>
 
         {error && <div className="text-red-500 text-center">{error}</div>}
 
@@ -49,11 +49,11 @@ const LoginForm = () => {
           {({ isSubmitting }) => (
             <Form className="space-y-4">
               <div>
-                <label className="block text-gray-700">Email</label>
+                <label className="block text-black">Email</label>
                 <Field
                   type="email"
                   name="email"
-                  className="w-full p-2 mt-1 border rounded-md border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+                  className="w-full p-2 mt-1 border rounded-md border-gray-700 focus:ring-slate-500 focus:border-slate-500 dark:bg-slate-700"
                 />
                 <ErrorMessage
                   name="email"
@@ -63,11 +63,11 @@ const LoginForm = () => {
               </div>
 
               <div>
-                <label className="block text-gray-700">Password</label>
+                <label className="block text-black">Password</label>
                 <Field
                   type="password"
                   name="password"
-                  className="w-full p-2 mt-1 border rounded-md border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+                  className="w-full p-2 mt-1 border rounded-md border-gray-700 focus:ring-slate-500 focus:border-slate-500 dark:bg-slate-700"
                 />
                 <ErrorMessage
                   name="password"
@@ -79,7 +79,7 @@ const LoginForm = () => {
               <div>
                 <button
                   type="submit"
-                  className="w-full px-4 py-2 font-bold text-black bg-purple-600 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-4 py-2 mt-3 font-bold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Logging in..." : "Login"}
@@ -90,8 +90,8 @@ const LoginForm = () => {
         </Formik>
 
         <div className="text-center">
-          <Link to="/register" className="text-purple-600 hover:underline">
-            Don't have an account? Register here.
+          <Link to="/register" className="dark:text-slate-400 hover:underline">
+            Don&apos;t have an account? Register here.
           </Link>
         </div>
       </div>
