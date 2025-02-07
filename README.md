@@ -1,193 +1,129 @@
-# Headway Learning - Mental Health eLearning Platform
-
-Headway Learning is an informational eLearning platform focused on providing resources and educational content about mental health illnesses. The platform serves as a repository of detailed articles, multimedia, and descriptions of various mental health conditions.
-
-## Table of Contents
-
-- [Project Overview](#project-overview)
-- [Features](#features)
-- [Technology Stack](#technology-stack)
-- [API Documentation](#api-documentation)
-- [Database Models](#database-models)
-- [Frontend Overview](#frontend-overview)
-- [Contributing](#contributing)
-- [License](#license)
-
----
+# Speed Type
 
 ## Project Overview
 
-The goal of **Headway Learning** is to spread awareness and provide education about mental health illnesses through informative articles, videos, and other resources. The platform is designed to offer an accessible learning experience for anyone seeking information on mental health conditions.
+The Speed Typing Application is a full-stack web application designed to test and improve users' typing speed and accuracy. The application generates a random paragraph on each refresh, and users must type it as accurately and quickly as possible. Upon completion, they receive a real-time score reflecting their words per minute (WPM) and accuracy. 
 
 ---
 
 ## Features
 
-- **Comprehensive Information**: Detailed pages about various mental health illnesses.
-- **Search Functionality**: Users can search and filter for specific mental health topics.
-- **Multimedia Support**: Video and other educational materials to enhance learning.
-- **Resource Links**: Links to external resources such as official health organizations and guides.
+- **User Authentication & Authorisation**: Secure user registration and login using JSON Web Tokens (JWT) to ensure that only authenticated users can access and manage their tasks.
+- **Random Paragraph Generation**: Each time the page is refreshed, a new random paragraph is fetched from the backend.
+- **Responsive Design**: A clean and minimalistic UI designed for a seamless typing experience.
 
 ---
 
 ## Technology Stack
 
-- **Backend**: Node.js, Express, PostgreSQL
-- **Frontend**: React
+- **Backend**: Python, Flask
+- **Frontend**: React, Tailwind
 - **Database**: PostgreSQL
-- **ORM**: TypeORM (for managing database operations)
 - **Authentication**: JWT
 
 ---
 
 ## API Documentation
 
-### 1. **GET /api/illnesses**
+### 1. **POST /register**
 
-**Description**: Fetch a list of all mental health illnesses.
+**Description**: Register a new user.
+
+**Payload**:
+
+```json
+{
+  "username": "example",
+  "email": "example@hotmail.com",
+  "password": "example123"
+}
+```
+
+### 2. POST /login
+
+**Description**: User login.
+
+**Payload**:
+
+```json
+{
+  "email": "example@hotmail.com",
+  "password": "example123"
+}
+```
+
+### 3. GET /generated_paragraph
+
+**Description**: Retrieve the randomly generated paragraph (requires JWT token in the header).
 
 **Response**:
 
 ```json
-[
-  {
-    "id": 1,
-    "name": "Anxiety Disorder",
-    "description": "Detailed description about anxiety disorder",
-    "symptoms": "List of symptoms",
-    "treatments": "List of treatments",
-    "videoUrl": "http://youtube.com/example",
-    "resources": "http://example.com/resources"
-  }
-]
-```
-
-### 2. POST /api/illnesses (Admin Only)
-
-**Description**: Add a new illness (requires admin privileges).
-
-**Request**:
-
-```json
-[
-  {
-  "name": "New Illness",
-  "description": "Description of the illness",
-  "symptoms": "List of symptoms",
-  "treatments": "List of treatments",
-  "videoUrl": "http://youtube.com/example",
-  "resources": "http://example.com/resources"
+{
+    "paragraph": "Property treat ahead painting hotel develop employee. Hard check art build room. Green offer in often officer. Although year air dog effect grow government daughter. Again beat hundred car again even. Life friend game buy. Edge safe world. Mean well surface around ago name card yard. Indicate decade dark question movie wish your. Yard fly source fish class Democrat. Gas third marriage he nearly. Because movie fill. As image language ask brother ready."
 }
-]
 ```
 
-### 3. PUT /api/illnesses/ (Admin Only)
+### 4. GET /users
 
-**Description**: Update the details of an existing illness by ID (requires admin privileges).
-
-**Request**:
-
-```json
-[
-  {
-  "name": "Updated Illness Name",
-  "description": "Updated description",
-  "symptoms": "Updated symptoms",
-  "treatments": "Updated treatments",
-  "videoUrl": "http://youtube.com/example",
-  "resources": "http://example.com/resources"
-}
-]
-```
-
-
-### 4. DELETE /api/illnesses/ (Admin Only)
-
-**Description**: Delete an illness by ID (requires admin privileges).
+**Description**: Retrieve all the users.
 
 **Response**:
 
 ```json
-[
-  {
-  "message": "Illness deleted successfully"
+{
+    "users": [
+        {
+            "email": "example@hotmail.com",
+            "id": 1,
+            "username": "example one"
+        },
+        {
+            "email": "example2@outlook.com",
+            "id": 2,
+            "username": "example two"
+        },
+        {
+            "email": "example3@outlook.com",
+            "id": 3,
+            "username": "example three"
+        }
+    ]
 }
-]
 ```
 
+### 5. DELETE /delete_user/:id
 
+**Description**: Delete user using user id.
 
-## Database Models
+**Response**:
 
-### Illness Model
+```json
+{
+    "message": "User deleted successfully"
+}
+```
 
-The **Illness** model contains all relevant information about a specific mental health illness.
+### 6. PUT /update_user
 
-| Field         | Type      | Description                                      |
-|---------------|-----------|--------------------------------------------------|
-| `id`          | `integer` | Primary key                                      |
-| `name`        | `string`  | Name of the illness                              |
-| `description` | `text`    | Detailed description of the illness              |
-| `symptoms`    | `text`    | List of symptoms of the illness                  |
-| `treatments`  | `text`    | List of treatment methods                        |
-| `videoUrl`    | `string`  | Optional video link explaining the illness       |
-| `resources`   | `string`  | Optional external resources or links             |
+**Description**: Updates user details (requires JWT token in the header).
 
----
+**Response**:
 
-### Article Model (Optional)
-
-The **Article** model allows additional articles or information pieces related to mental health to be stored and accessed by users.
-
-| Field       | Type      | Description                                      |
-|-------------|-----------|--------------------------------------------------|
-| `id`        | `integer` | Primary key                                      |
-| `title`     | `string`  | Title of the article                             |
-| `content`   | `text`    | Main content of the article                      |
-| `illnessId` | `integer` | Foreign key that links to an illness (optional)  |
+```json
+{
+    "message": "User updated successfully"
+}
+```
 
 ---
 
-### Video Model (Optional)
+## Future Improvements
 
-The **Video** model contains links to educational videos related to mental health illnesses.
-
-| Field       | Type      | Description                                      |
-|-------------|-----------|--------------------------------------------------|
-| `id`        | `integer` | Primary key                                      |
-| `title`     | `string`  | Title of the video                               |
-| `videoUrl`  | `string`  | URL of the video                                 |
-| `illnessId` | `integer` | Foreign key that links to an illness (optional)  |
-
-
-
-## Frontend Overview
-
-The frontend for **Headway Learning** will be built using **React** to provide an intuitive and user-friendly interface. The frontend will interact with the backend API to display information about mental health illnesses.
-
-### Key Pages
-
-- **Home Page**: Introduction to the platform and a listing of featured illnesses.
-- **Illness Detail Page**: Provides detailed information about each illness, including symptoms, treatments, and any available multimedia resources.
-- **Search and Filter**: Allows users to search for specific mental health conditions or filter by categories (e.g., anxiety, mood disorders, etc.).
-- **Resources Page**: Displays additional articles and links to external resources for users.
+- **Difficulty Levels**: Introduce different difficulty levels (easy, medium, hard) with varying paragraph lengths and word complexity.
+- **Achievements & Badges**: Reward users with badges for achieving milestones (e.g., "50 WPM Club", "100% Accuracy Streak").
+- **AI-Based Typing Coach**: Implement an AI-powered assistant that gives feedback on typing patterns.
 
 ---
 
-## Contributing
-
-We welcome contributions to **Headway Learning**. If you would like to contribute, please follow these steps:
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/your-feature`).
-3. Commit your changes (`git commit -m 'Add new feature'`).
-4. Push to the branch (`git push origin feature/your-feature`).
-5. Open a pull request and describe the changes you've made.
-
----
-
-## License
-
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for more information.
-
-
+![Home Page](SpeedType.png)
